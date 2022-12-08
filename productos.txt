@@ -1,0 +1,7 @@
+[
+    {
+    title: 'aaa',
+    price: '250',
+    thumbnail: 'https://cdn3.iconfinder.com/data/icons/fruits-52/150/icon_fruit_manga-256.png'
+    }
+]
