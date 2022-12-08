@@ -1,34 +1,22 @@
-<div class="d-flex justify-content-center align-items-center flex-column w-100 vh-100">
-    <h2 class="mb-5">Iniciar sesión</h2>
-    <div class="w-75">
-        <form action="/" method="POST" id="agregar-producto" class="d-flex justify-content-center align-items-center flex-column mb-5">
-            <label for="usuario">Usuario:</label>
-            <input type="text" name="usuario"  id="usuario" class="w-50" required>
-            <label for="email">Email:</label>
-            <input type="email" name="email" id="email" class="w-50" required>
-            <input type="submit" class="btn btn-light mt-3" value="Ingresar">
-        </form>
-    </div>
-</div>
-<div class="d-flex justify-content-center align-items-center w-100 vh-100">
-  <div class="d-flex justify-content-center align-items-center flex-column w-50 h-50">
-      <h2 class="mb-5">Agregar nuevo producto</h2>
+<div class="d-flex justify-content-center align-items-center w-100 vh-100" id="contenedor-principal">
+  <div class="d-flex justify-content-center align-items-center flex-column w-50 h-100">
+      <h3>Agregar nuevo producto</h3>
       <div class="w-75">
-          <form id="agregar-producto" class="d-flex justify-content-center align-items-center flex-column mb-5">
+          <form id="agregar-producto" class="d-flex justify-content-center align-items-center flex-column">
               <label for="title">Producto:</label>
               <input type="text" name="title"  id="title" class="w-50" required>
               <label for="price">Precio:</label>
               <input type="text" name="price" id="price" class="w-50" required>
               <label for="thumbnail">Url de la imagen:</label>
               <input type="text" name="thumbnail" id="thumbnail" class="w-50" required>
-              <input type="submit" class="btn btn-light mt-3" value="Agregar producto">
+              <input type="submit" class="btn btn-primary mt-3" value="Agregar producto">
           </form>
       </div>
   </div>
-  <div class="d-flex justify-content-center align-items-center flex-column w-50 h-25">
-    <h2 class="mb-4">Vista de productos</h2>
-    
-      <table class="table table-hover border w-75">
+  <div class="d-flex justify-content-center align-items-center flex-column w-50 h-100">
+    <h3 class="mb-4">Vista de productos</h3>
+  
+      <table class="table table-hover border w-75" style="overflow: auto;;">
         <thead>
           <tr>
             <th scope="col">Producto</th>
@@ -43,14 +31,80 @@
   </div>
 </div>
 
-<script>
-  let agregarProducto = document.getElementById('agregar-producto')
-  let socket = io()
-  let tabla = document.getElementById('tabla')
+<div class="vh-100 w-100" id="contenedorChat">
+  <div class=" justify-content-center align-items-center flex-column w-100 vh-100">
+      <h3 class="mb-5">Ingresa al chat</h3>
+      <div class="w-75">
+          <form id="agregar-usuario" class="d-flex justify-content-center align-items-center flex-column mb-5">
+              <label for="usuario">Usuario:</label>
+              <input type="text" name="usuario"  id="usuario" class="w-50" required>
+              <label for="email">Email:</label>
+              <input type="email" name="email" id="email" class="w-50" required>
+              <input type="submit" class="btn btn-primary mt-3" value="Ingresar">
+          </form>
+      </div>
+  </div>
+  
+  <div class=" justify-content-center align-items-center flex-column w-100 vh-100">
+      <h2 class="mb-5 mt-5">Chat</h2>
+              <div class="h-75 w-75" style="overflow:auto">
+                <p id="parrafo-chat"></p>
+              </div>
+              <div class="input-group mb-3 w-75 mb-4 mt-4">
+                <input type="text" name="mensaje" id="mensaje" class="form-control" placeholder="Escribe tu mensaje aqui" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                <div class="input-group-append">
+                <button class="btn btn-outline-secondary" id="enviar-mensaje" type="button">Enviar Mensaje</button>
+              </div>
+  </div>
+</div>
 
-  socket.on("init", data => {
-    loadData(data)
+<script>
+
+  let user = null
+  let agregarUsuario = document.getElementById("agregar-usuario")
+  let usuario = document.getElementById("usuario")
+  let email = document.getElementById("email")
+  let contenedorChat = document.getElementById("contenedorChat")
+
+  agregarUsuario.addEventListener("submit", evt => {
+    evt.preventDefault()
+    user = {
+      usuario: usuario.value,
+      email: email.value
+    }
+    socket.emit("agregarUsuario", user)
+    contenedorChat.classList.add("active")
   })
+
+
+
+  let parrafo = document.getElementById("parrafo-chat")
+  let btnMensaje = document.getElementById("enviar-mensaje")
+  let mensaje = document.getElementById("mensaje")
+
+  let socket = io()
+
+  btnMensaje.addEventListener("click", evt => {
+    let nuevoMsj = mensaje.value
+    mensajeNuevo = {
+      msj : nuevoMsj,
+    }
+    socket.emit("nuevoMensaje", nuevoMsj)
+    mensaje.value = ""
+  })
+    
+  socket.on("fillP", data => {
+    let innerP = ''
+      data.forEach(element => {
+        innerP += `<p style="color:brown">${element}</p> </br>`
+      }) 
+      parrafo.innerHTML = innerP
+  })
+
+
+
+  let agregarProducto = document.getElementById('agregar-producto')
+  let tabla = document.getElementById('tabla')
 
   agregarProducto.addEventListener("submit", evt => {
     evt.preventDefault()
@@ -65,12 +119,12 @@
     socket.emit("nuevoProducto", productoNuevo)
   })
     
-  socket.on("fillP", data => {
+  socket.on("fillProd", data => {
     let innerP = ''
       data.forEach(element => {
         innerP += `<tr>
                     <th>${element.title}</th>
-                    <th>${element.price}</th>
+                    <th>$${element.price}</th>
                     <th><img src=${element.thumbnail} height="30px" width="30px" alt=""></th>
                   </tr>`
       }) 
